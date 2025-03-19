@@ -1,12 +1,37 @@
-import React from 'react'
-import { useParams } from 'react-router-dom'
-import { useGetMediaQuery } from '../../features/media/media';
+import { useEffect } from 'react'
+import { useDeleteMediaMutation, useGetMediaQuery, useUpdateMediaMutation } from '../../features/media/media';
+import { skipToken } from '@reduxjs/toolkit/query';
+import Field from '../form/Field';
+import { useForm } from 'react-hook-form';
+
 
 const FileDetails = ({ selectImage }) => {
+    const { register, handleSubmit, reset } = useForm();
 
-    const { id } = useParams();
-    const { data: media, isLoading, isError } = useGetMediaQuery(selectImage, { skip: !selectImage });
-    console.log("single data", media);
+    const { data: media, isLoading, isError } = useGetMediaQuery(selectImage ?? skipToken);
+
+    const [updateMedia, { isSuccess: isUpdateSuccess }] = useUpdateMediaMutation();
+    const [deleteMedia, { isSuccess: isDeleteSuccess }] = useDeleteMediaMutation();
+
+    useEffect(() => {
+        if (isDeleteSuccess || isUpdateSuccess) {
+            const modalElement = document.querySelector('[data-bs-dismiss="modal"]');
+            modalElement?.click();
+        }
+    }, [isDeleteSuccess, isUpdateSuccess]);
+
+
+    const handleDelete = async () => {
+        if (window.confirm(`Are you sure you want to delete this ${selectImage} ?`)) {
+            await deleteMedia(selectImage);
+        }
+    };
+
+    const onSubmit = async (data) => {
+
+        await updateMedia({ id: selectImage, ...data });
+    };
+
     return (
         <div className="modal fade" id="media_file_modal" data-bs-backdrop="static">
             <div className="modal-dialog  modal-lg">
@@ -22,74 +47,51 @@ const FileDetails = ({ selectImage }) => {
                     </div>
                     <div className="modal-body">
                         <div className="media_file_modal">
-                            <form action="">
+                            <form action="" onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
                                 <div className="row">
                                     <div className="col-sm-6">
                                         <div className="image">
                                             <img src={media?.url} alt={media?.title} />
                                         </div>
                                     </div>
+
                                     <div className="col-sm-6">
                                         <div className="form-group position-relative mb-3">
-                                            <label htmlFor="" className="form-label">
-                                                Alternative Text
-                                            </label>
-                                            <textarea
-                                                name=""
-                                                className="form-control"
-                                                id=""
-                                                placeholder="Enter text"
-                                            />
-                                        </div>
-                                        <div className="form-group position-relative mb-3">
-                                            <label htmlFor="" className="form-label">
-                                                Title
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Title here"
-                                                // value={media?.title}
-                                                defaultValue={media?.title}
-                                            />
+                                            <Field label="Alternative Text">
+                                                <textarea className="form-control" placeholder="Enter text" id="name"
+                                                    name="alt" defaultValue={media?.alt}
+                                                    {...register("alt")} />
+                                            </Field>
 
                                         </div>
                                         <div className="form-group position-relative mb-3">
-                                            <label htmlFor="" className="form-label">
-                                                Caption
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="Caption here"
-                                            />
-
+                                            <Field label="Title">
+                                                <input type="text" id="title" name="title" defaultValue={media?.title} className="form-control" placeholder="Title here" {...register("title")} />
+                                            </Field>
                                         </div>
                                         <div className="form-group position-relative mb-3">
-                                            <label htmlFor="" className="form-label">
-                                                Description
-                                            </label>
-                                            <textarea
-                                                name=""
-                                                className="form-control"
-                                                id=""
-                                                placeholder="Enter Description"
-                                            />
-
+                                            <Field label="Caption">
+                                                <input type="text" id="caption" name="caption" defaultValue={media?.caption} className="form-control" placeholder="Caption here" {...register("caption")} />
+                                            </Field>
                                         </div>
                                         <div className="form-group position-relative mb-3">
-                                            <label htmlFor="" className="form-label">
-                                                File URL
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder=" File URL here"
-                                                value={media?.url}
-                                            />
-
+                                            <Field label="Description">
+                                                <textarea className="form-control" placeholder="Enter Description" id="desc"
+                                                    name="desc" defaultValue={media?.desc}
+                                                    {...register("desc")} />
+                                            </Field>
                                         </div>
-
+                                        <div className="form-group position-relative mb-3">
+                                            <Field label="File URL">
+                                                <input type="text" className="form-control" placeholder="Enter URL" id="url"
+                                                    name="url" defaultValue={media?.url}
+                                                    {...register("url")} />
+                                            </Field>
+                                        </div>
+                                        {/* <div className="form-group position-relative mb-3">
+                                                <label htmlFor="" className="form-label">File URL</label>
+                                                <input type="text" className="form-control" placeholder=" File URL here" />
+                                            </div> */}
                                     </div>
                                     <div className="col-sm-12">
                                         <div className="form-action d-flex justify-content-end mt-3">
@@ -100,8 +102,10 @@ const FileDetails = ({ selectImage }) => {
                             </form>
                             <div className="w-100 d-flex align-items-center gap-3 mt-3">
                                 <a href="#" className='text-black font-14' >Download file  </a> |
-                                <a href="#" className='text-danger font-14' > Delete permanently</a>
+                                <div href="#" className='text-danger font-14 cursor-pointer' onClick={handleDelete} > Delete permanently</div>
                             </div>
+
+
                         </div>
                     </div>
                 </div>

@@ -11,6 +11,8 @@ const Media = () => {
 
     const { data: media, isLoading, isError } = useGetMediasQuery();
 
+
+
     let content = null;
 
     if (isLoading) {
@@ -41,11 +43,6 @@ const Media = () => {
 
 
 
-    // const category = [
-    //     { value: '1', label: 'File' },
-    //     { value: '2', label: 'Image' },
-    //     { value: '3', label: 'Video' },
-    // ]
     return (
         <>
             <div className="page-title d-flex align-items-center justify-content-between">
