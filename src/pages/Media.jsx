@@ -32,7 +32,7 @@ const Media = () => {
 
             <div className="media-file " key={image.id} onClick={() => setSelectImage(image.id)}>
                 <Link to="#" data-bs-toggle="modal" data-bs-target="#media_file_modal">
-                    <img src={image.url} alt={image.title} />
+                    <img src={image?.url} alt={image.title} />
                 </Link>
             </div>
 

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 
 
 const FileDetails = ({ selectImage }) => {
-    const { register, handleSubmit, reset } = useForm();
+    const { register, handleSubmit } = useForm();
 
     const { data: media, isLoading, isError } = useGetMediaQuery(selectImage ?? skipToken);
 
@@ -28,8 +28,16 @@ const FileDetails = ({ selectImage }) => {
     };
 
     const onSubmit = async (data) => {
+        const updatedData = {
+            id: selectImage,
+            alt: data.alt || media.alt,
+            title: data.title || media.title,
+            caption: data.caption || media.caption,
+            desc: data.desc || media.desc,
+            url: data.url || media.url,
+        };
 
-        await updateMedia({ id: selectImage, ...data });
+        await updateMedia(updatedData);
     };
 
     return (
@@ -51,7 +59,7 @@ const FileDetails = ({ selectImage }) => {
                                 <div className="row">
                                     <div className="col-sm-6">
                                         <div className="image">
-                                            <img src={media?.url} alt={media?.title} />
+                                            <img src={media?.url} alt={media?.title || ""} />
                                         </div>
                                     </div>
 
@@ -59,32 +67,32 @@ const FileDetails = ({ selectImage }) => {
                                         <div className="form-group position-relative mb-3">
                                             <Field label="Alternative Text">
                                                 <textarea className="form-control" placeholder="Enter text" id="name"
-                                                    name="alt" defaultValue={media?.alt}
+                                                    name="alt" defaultValue={media?.alt || ""}
                                                     {...register("alt")} />
                                             </Field>
 
                                         </div>
                                         <div className="form-group position-relative mb-3">
                                             <Field label="Title">
-                                                <input type="text" id="title" name="title" defaultValue={media?.title} className="form-control" placeholder="Title here" {...register("title")} />
+                                                <input type="text" id="title" name="title" defaultValue={media?.title || ""} className="form-control" placeholder="Title here" {...register("title")} />
                                             </Field>
                                         </div>
                                         <div className="form-group position-relative mb-3">
                                             <Field label="Caption">
-                                                <input type="text" id="caption" name="caption" defaultValue={media?.caption} className="form-control" placeholder="Caption here" {...register("caption")} />
+                                                <input type="text" id="caption" name="caption" defaultValue={media?.caption || ""} className="form-control" placeholder="Caption here" {...register("caption")} />
                                             </Field>
                                         </div>
                                         <div className="form-group position-relative mb-3">
                                             <Field label="Description">
                                                 <textarea className="form-control" placeholder="Enter Description" id="desc"
-                                                    name="desc" defaultValue={media?.desc}
+                                                    name="desc" defaultValue={media?.desc || ""}
                                                     {...register("desc")} />
                                             </Field>
                                         </div>
                                         <div className="form-group position-relative mb-3">
                                             <Field label="File URL">
                                                 <input type="text" className="form-control" placeholder="Enter URL" id="url"
-                                                    name="url" defaultValue={media?.url}
+                                                    name="url" defaultValue={media?.url || ""}
                                                     {...register("url")} />
                                             </Field>
                                         </div>
